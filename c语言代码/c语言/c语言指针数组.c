@@ -15,7 +15,7 @@ int main()
         "world",
         "c",
         "language",
-        "pointer"};
+        "pointer"};   
     // 定义一个整型变量i，用于循环控制
         int i;
     // 使用for循环遍历字符指针数组p1

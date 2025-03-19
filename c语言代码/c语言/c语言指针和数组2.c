@@ -24,6 +24,7 @@ int main()
     printf("%d,%d,%d\n",b[0],b[1],b[2]); //  直接打印数组b中每个元素的值
     float *p2=c;
     char *p1=a;
+    printf("%c,%c,%c\n",*p2,*(p2+1),*(p2+2)); //  定义一个浮点型指针p2，指向数组c的首地址
     printf("%c,%c,%c\n",*p1,*(p1+1),*(p1+2)); //  定义一个字符型指针p1，指向数组a的首地址
     char *p3="i love you";
     for(int i=0;i<strlen(p3);i++)

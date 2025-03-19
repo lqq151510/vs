@@ -6,84 +6,83 @@
 int main(){
     int arr[3][4]={ 1,2,3,4,5,6,7,8,9,10,11,300 };
     //1
-    int *p1=arr[0];
-    printf("%d ",*p1);
-    putchar('\n');
+    int *p1=arr[0]; // 将arr[0]的地址赋值给指针p1，arr[0]是一个指向int[4]的指针
+    printf("%d ",*p1); // 输出p1指向的值，即arr[0][0]
+    putchar('\n'); // 输出换行符
     //2
-    int *p2=arr[1];
-    printf("%d ",p1[4]);
-    printf("%d ",p2[0]);
-    printf("%d ",p2[-1]);
-    putchar('\n');
+    int *p2=arr[1]; // 将arr[1]的地址赋值给指针p2，arr[1]是一个指向int[4]的指针
+    printf("%d  ",p1[4]); // 输出p1指向的数组的第5个元素，即arr[0][4]
+    printf("%d  ",p2[0]); // 输出p2指向的数组的第一个元素，即arr[1][0]
+    printf("%d  ",p2[-1]); // 输出p2指向的数组的第-1个元素，即arr[1][-1]，等价于arr[1][3]
+    putchar('\n'); // 输出换行符
 
     //2.5
-    printf("%d",*(arr[1]+1));
-    printf("%d",*(p2+1));
-    printf("%d",(arr[1]+1)[1]);
-    printf("%d",(p2+1)[1]);
-
+    printf("%d",*(arr[1]+1)); // 输出arr[1][1]
+    printf("%d",*(p2+1)); // 输出p2指向的数组的第2个元素，即arr[1][1]
+    printf("%d",(arr[1]+1)[1]); // 输出arr[1][2]等价于(arr[1]+1)[1] 等价于 *(arr[1]+1+1)，即 arr[1][2]。
+    printf("%d",(p2+1)[1]); // 输出p2指向的数组的第3个元素，即arr[1][2]    
     //3
-    int *p3=&arr[0][0];
-    printf("%d ",p3[0]);
-    printf("%d ",p3[4]);
-    putchar('\n');
+    int *p3=&arr[0][0]; // 将arr[0][0]的地址赋值给指针p3
+    printf("%d ",p3[0]); // 输出p3指向的值，即arr[0][0]
+    printf("%d ",p3[4]); // 输出p3指向的数组的第5个元素，即arr[0][4]
+    putchar('\n'); // 输出换行符
     //4
-    int(*p4)[4]=arr;
-    printf("%d ",p4[0]);
-    printf("%d ",p4[1][2]);
-    printf("%d ",p4[1][-1]);
-    printf("%d ",p4[1][5]);
-    putchar('\n');
+    int(*p4)[4]=arr; // 将arr的地址赋值给指针p4，p4是一个指向int[4]的指针
+    printf("%d ",p4[0]); // 输出p4指向的数组的第一个元素，即arr[0]
+    printf("%d ",p4[1][2]); // 输出p4指向的数组的第二行的第三个元素，即arr[1][2]
+    printf("%d ",p4[1][-1]); // 输出p4指向的数组的第二行的第-1个元素，即arr[1][3]
+    printf("%d ",p4[1][5]); // 输出p4指向的数组的第二行的第5个元素，即arr[1][1]
+    putchar('\n'); // 输出换行符
     //5
-    int(*p5)[3]=(int(*)[3])arr;
-    printf("%d ",p5[1][2]);
-    putchar('\n');
+    int(*p5)[3]=(int(*)[3])arr; // 将arr的地址转换为指向int[3]的指针赋值给p5
+    printf("%d ",p5[1][2]); // 输出p5指向的数组的第二行的第三个元素，即arr[1][2]
+    putchar('\n'); // 输出换行符
     //6
-    char *p6=(char *)&p5[3][2];
+    char *p6=(char *)&p5[3][2]; // 将p5[3][2]的地址转换为char*赋值给p6
     for(int i=0;i<=3;i++){
-        printf("%d ",p6[i]);
+        printf("%d ",p6[i]); // 输出p6指向的数组的4个字节
     }
-    putchar('\n');
+    putchar('\n'); // 输出换行符
 
     //7
-    char brr[4]={ 1,1,0,0 };
-    int res=*(int *)brr;
-    printf("%d ",res);
-    putchar('\n');
+    char brr[4]={ 1,1,0,0 }; // 定义一个字符数组brr
+    int res=*(int *)brr; // 将brr的地址转换为int*并解引用赋值给res
+    printf("%d ",res); // 输出res的值
+    putchar('\n'); // 输出换行符
 
     //8
     int m=3,n=4;
-    int **c0=(int **)malloc(m*sizeof(int *));
+    int **c0=(int **)malloc(m*sizeof(int *)); // 动态分配一个指向int*的指针数组
     for(int i=0;i<=m-1;i++){
-        c0[i]=(int *)malloc(n*sizeof(int));
+        c0[i]=(int *)malloc(n*sizeof(int)); // 动态分配每一行的空间
     }
 
     for(int i=0;i<=m-1;i++){
-        free(c0[i]);
+        free(c0[i]); // 释放每一行的空间
     }
-    free(c0);
+    free(c0); // 释放指针数组的空间
     // 二维数组c0和arr有什么区别
 
     //9
-    int(*c1)[4]=(int(*)[4])malloc(3*4*sizeof(int));
-    int(*c2)[3][4]=(int(*)[3][4])malloc(1*3*4*sizeof(int));
-    memset(c1,0,sizeof(c1));
-    memset(c2,0,sizeof(c2));
+    int(*c1)[4]=(int(*)[4])malloc(3*4*sizeof(int)); // 动态分配一个指向int[4]的指针
+    int(*c2)[3][4]=(int(*)[3][4])malloc(1*3*4*sizeof(int)); // 动态分配一个指向int[3][4]的指针
+    memset(c1,0,sizeof(c1)); // 将c1指向的空间初始化为0
+    memset(c2,0,sizeof(c2)); // 将c2指向的空间初始化为0
 
-    int *pc1=*c1;
-    int *pc2=(*c2)[0];
+    int *pc1=*c1; // 将c1指向的数组的第一个元素赋值给pc1
+    int *pc2=(*c2)[0]; // 将c2指向的数组的第一个元素赋值给pc2
 
     for(int i=1;i<=12;i++){
-        pc1[i-1]=pc2[i-1]=i;
+        pc1[i-1]=pc2[i-1]=i; // 将1到12依次赋值给pc1和pc2指向的数组
     }
 
-#define m (*c2)
-    printf("%d ",c2[0][1][2]);
-    printf("%d ",m[1][2]);
-    printf("%d ",*(*(m+1)+2));
+#define m (*c2) // 定义宏m为*c2
+    printf("%d ",c2[0][1][2]); // 输出c2指向的数组的第一个元素的第二个元素的第三个元素
+    printf("%d ",m[1][2]); // 输出m的第二个元素的第三个元素
+    printf("%d ",*(*(m+1)+2)); // 输出m的第二个元素的第三个元素
 
-    free(c1);
-    free(c2);
+    free(c1); // 释放c1指向的空间
+    free(c2); // 释放c2指向的空间
 
     //二维数组c1,c2和arr分别有什么区别
     //二维数组m和arr有什么区别
