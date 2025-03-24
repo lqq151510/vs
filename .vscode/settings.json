@@ -1,4 +1,10 @@
 {
     "Codegeex.Chat.LanguagePreference": "中文",
-    "Codegeex.RepoIndex": true
+    "Codegeex.RepoIndex": true,
+    "files.associations": {
+        "*.sqlbook": "sql",
+        "*.ndjson": "jsonl",
+        "*.dbclient-js": "javascript",
+        "stdio.h": "c"
+    }
 }
