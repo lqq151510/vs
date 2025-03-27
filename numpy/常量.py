@@ -8,6 +8,3 @@ y=np.isnan(x) #判断是否为nan
 print(y)
 z=np.count_nonzero(y)#这里使用了numpy的count_nonzero方法来统计布尔数组中True值的数量
 print(z)
-numpy.inf#表示正无穷大，-numpy.inf表示负无穷大。
-numpy.pi#圆周率
-numpy.e#自然对数的底数
