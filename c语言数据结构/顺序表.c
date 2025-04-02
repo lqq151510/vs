@@ -2,7 +2,7 @@
 #define Ok 1
 #define ERROR 0
 #define TRUE 1
-#define FALSE 0
+#define FALSE 
 #define MAXSIZE 100
 //插入  
 // typedef int ElemType;
