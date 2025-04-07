@@ -1,342 +1,319 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-// 定义多项式的项结构体
+// 定义排序方式
+#define DESCENDING 0
+#define ASCENDING 1
+
+// 定义多项式项的结构体
 typedef struct Term {
-    int coeff; // 系数
-    int exp;   // 指数
-} Term;
+    int coefficient; // 系数
+    int exponent;    // 指数
+    struct Term *next; // 指向下一个项的指针
+    struct Term *prev; // 为了反向遍历，指向上一个项的指针
+} Term, *Polynomial; // Term为结构体类型，Polynomial为指向Term的指针类型
 
-// 定义多项式的节点结构体
-typedef struct Node {
-    Term term;           // 项
-    struct Node *next;    // 指向下一个节点的指针
-} Node, *Polynomial;     // Node为节点类型，Polynomial为指向节点的指针类型
+// 函数声明
+Polynomial createPolynomial();
+void insertTerm(Polynomial poly, int coefficient, int exponent);
+Polynomial addPolynomials(Polynomial poly1, Polynomial poly2);
+Polynomial subtractPolynomials(Polynomial poly1, Polynomial poly2);
+Polynomial multiplyPolynomials(Polynomial poly1, Polynomial poly2);
+void printPolynomial(Polynomial poly, int order);
+void freePolynomial(Polynomial poly);
 
-// 创建一个空的多项式
-Polynomial create_polynomial() {
-    Polynomial head = (Polynomial)malloc(sizeof(Node)); // 分配头节点内存
-    head->next = NULL; // 头节点的下一个节点为空
-    return head; // 返回头节点指针
+int main() {
+    Polynomial poly1 = createPolynomial(); // 创建第一个多项式
+    Polynomial poly2 = createPolynomial(); // 创建第二个多项式
+    
+    printf("请输入第一个多项式的项数: ");
+    int n1;
+    scanf("%d", &n1); // 读取第一个多项式的项数
+    printf("请输入第一个多项式的系数和指数(格式: 系数 指数):\n");
+    for (int i = 0; i < n1; i++) {
+        int coeff, exp;
+        scanf("%d %d", &coeff, &exp); // 读取系数和指数
+        insertTerm(poly1, coeff, exp); // 插入项到第一个多项式
+    }
+    
+    printf("请输入第二个多项式的项数: ");
+    int n2;
+    scanf("%d", &n2); // 读取第二个多项式的项数
+    printf("请输入第二个多项式的系数和指数(格式: 系数 指数):\n");
+    for (int i = 0; i < n2; i++) {
+        int coeff, exp;
+        scanf("%d %d", &coeff, &exp); // 读取系数和指数
+        insertTerm(poly2, coeff, exp); // 插入项到第二个多项式
+    }
+    
+    printf("\n请选择操作:\n");
+    printf("1. 加法\n");
+    printf("2. 减法\n");
+    printf("3. 乘法\n");
+    printf("输入选择(1-3): ");
+    int choice;
+    scanf("%d", &choice); // 读取用户选择
+    
+    Polynomial result;
+    switch (choice) {
+        case 1:
+            result = addPolynomials(poly1, poly2); // 多项式加法
+            printf("\n加法结果:\n");
+            break;
+        case 2:
+            result = subtractPolynomials(poly1, poly2); // 多项式减法
+            printf("\n减法结果:\n");
+            break;
+        case 3:
+            result = multiplyPolynomials(poly1, poly2); // 多项式乘法
+            printf("\n乘法结果:\n");
+            break;
+        default:
+            printf("无效选择\n");
+            return 1;
+    }
+    
+    printf("降幂排列: ");
+    printPolynomial(result, DESCENDING); // 打印降幂排列的多项式
+    printf("升幂排列: ");
+    printPolynomial(result, ASCENDING); // 打印升幂排列的多项式
+    
+    freePolynomial(poly1); // 释放第一个多项式内存
+    freePolynomial(poly2); // 释放第二个多项式内存
+    freePolynomial(result); // 释放结果多项式内存
+    
+    return 0;
 }
 
-// 销毁多项式，释放内存
-void destroy_polynomial(Polynomial poly) {
-    Node *current = poly->next; // 从头节点的下一个节点开始
-    while (current != NULL) {
-        Node *temp = current; // 临时保存当前节点
-        current = current->next; // 移动到下一个节点
-        free(temp); // 释放当前节点内存
-    }
-    free(poly); // 释放头节点内存
+// 创建一个空的多项式
+Polynomial createPolynomial() {
+    Polynomial poly = (Polynomial)malloc(sizeof(Term)); // 分配内存
+    poly->next = NULL; // 初始化指针
+    poly->prev = NULL; // 初始化指针
+    return poly;
 }
 
 // 向多项式中插入一个项
-void insert_term(Polynomial poly, int coeff, int exp) {
-    if (coeff == 0) return; // 系数为0的项不插入
-
-    Node *prev = poly; // 前一个节点指针初始化为头节点
-    Node *current = poly->next; // 当前节点指针初始化为头节点的下一个节点
-
+void insertTerm(Polynomial poly, int coefficient, int exponent) {
+    Term *newTerm = (Term *)malloc(sizeof(Term)); // 分配内存
+    newTerm->coefficient = coefficient; // 设置系数
+    newTerm->exponent = exponent; // 设置指数
+    newTerm->next = NULL; // 初始化指针
+    newTerm->prev = NULL; // 初始化指针
+    // 如果多项式为空，直接插入新项
+    if (poly->next == NULL) {
+        poly->next = newTerm;
+        newTerm->prev = poly;
+        return;
+    }
+    
+    Term *prev = poly; // 指向头节点的指针
+    Term *current = poly->next; // 指向第一个项的指针
+    
     // 找到插入位置
-    while (current != NULL && current->term.exp < exp) {
-        prev = current; // 移动前一个节点指针
-        current = current->next; // 移动当前节点指针
+    while (current != NULL && current->exponent < exponent) {
+        prev = current;
+        current = current->next;
     }
-
-    // 如果当前节点的指数与要插入的指数相同，则合并系数
-    if (current != NULL && current->term.exp == exp) {
-        current->term.coeff += coeff; // 合并系数
-        if (current->term.coeff == 0) { // 如果合并后的系数为0，则删除该节点
-            prev->next = current->next; // 前一个节点指向当前节点的下一个节点
-            free(current); // 释放当前节点内存
+    
+    // 如果指数相同，合并项
+    if (current != NULL && current->exponent == exponent) {
+        current->coefficient += coefficient;
+        free(newTerm); // 释放新分配的内存
+        if (current->coefficient == 0) { // 如果系数为0，删除该项
+            prev->next = current->next;
+            if (current->next != NULL) {
+                current->next->prev = prev;
+            }
+            free(current);
         }
-    } else { // 如果当前节点的指数与要插入的指数不同，则插入新节点
-        Node *new_node = (Node *)malloc(sizeof(Node)); // 分配新节点内存
-        new_node->term.coeff = coeff; // 设置新节点的系数
-        new_node->term.exp = exp; // 设置新节点的指数
-        new_node->next = current; // 新节点的下一个节点为当前节点
-        prev->next = new_node; // 前一个节点的下一个节点为新节点
+    } else { // 插入新项
+        newTerm->next = current;
+        newTerm->prev = prev;
+        prev->next = newTerm;
+        if (current != NULL) {
+            current->prev = newTerm;
+        }
     }
-}
-
-// 输入一个多项式
-Polynomial input_polynomial() {
-    int terms;
-    printf("请输入多项式的项数：");
-    scanf("%d", &terms); // 输入多项式的项数
-
-    Polynomial poly = create_polynomial(); // 创建空多项式
-
-    // 输入每一项的系数和指数
-    for (int i = 0; i < terms; i++) {
-        int coeff, exp;
-        printf("请输入第%d项的系数和指数（用空格分隔）：", i + 1);
-        scanf("%d %d", &coeff, &exp);
-        insert_term(poly, coeff, exp); // 插入项
-    }
-
-    return poly; // 返回输入的多项式
 }
 
 // 多项式加法
-Polynomial add_polynomial(Polynomial a, Polynomial b) {
-    Polynomial result = create_polynomial(); // 创建结果多项式
-    Node *p = a->next; // 指向第一个多项式的第一个节点
-    Node *q = b->next; // 指向第二个多项式的第一个节点
-
-    // 遍历两个多项式，合并同类项
-    while (p != NULL && q != NULL) {
-        if (p->term.exp < q->term.exp) {
-            insert_term(result, p->term.coeff, p->term.exp); // 插入a的当前项
-            p = p->next; // 移动到a的下一项
-        } else if (p->term.exp > q->term.exp) {
-            insert_term(result, q->term.coeff, q->term.exp); // 插入b的当前项
-            q = q->next; // 移动到b的下一项
+Polynomial addPolynomials(Polynomial poly1, Polynomial poly2) {
+    Polynomial result = createPolynomial(); // 创建结果多项式
+    
+    Term *term1 = poly1->next; // 指向第一个多项式的第一个项
+    Term *term2 = poly2->next; // 指向第二个多项式的第一个项
+    
+    // 遍历两个多项式
+    while (term1 != NULL && term2 != NULL) {
+        if (term1->exponent < term2->exponent) {
+            insertTerm(result, term1->coefficient, term1->exponent);
+            term1 = term1->next;
+        } else if (term1->exponent > term2->exponent) {
+            insertTerm(result, term2->coefficient, term2->exponent);
+            term2 = term2->next;
         } else {
-            int sum = p->term.coeff + q->term.coeff; // 合并同类项
+            int sum = term1->coefficient + term2->coefficient;
             if (sum != 0) {
-                insert_term(result, sum, p->term.exp); // 插入合并后的项
+                insertTerm(result, sum, term1->exponent);
             }
-            p = p->next; // 移动到a的下一项
-            q = q->next; // 移动到b的下一项
+            term1 = term1->next;
+            term2 = term2->next;
         }
     }
-
-    // 插入a剩余的项
-    while (p != NULL) {
-        insert_term(result, p->term.coeff, p->term.exp);
-        p = p->next;
+    
+    // 插入剩余项
+    while (term1 != NULL) {
+        insertTerm(result, term1->coefficient, term1->exponent);
+        term1 = term1->next;
     }
-
-    // 插入b剩余的项
-    while (q != NULL) {
-        insert_term(result, q->term.coeff, q->term.exp);
-        q = q->next;
+    
+    while (term2 != NULL) {
+        insertTerm(result, term2->coefficient, term2->exponent);
+        term2 = term2->next;
     }
-
-    return result; // 返回结果多项式
+    
+    return result;
 }
 
 // 多项式减法
-Polynomial subtract_polynomial(Polynomial a, Polynomial b) {
-    Polynomial result = create_polynomial(); // 创建结果多项式
-    Node *p = a->next; // 指向第一个多项式的第一个节点
-    Node *q = b->next; // 指向第二个多项式的第一个节点
-
-    // 遍历两个多项式，合并同类项
-    while (p != NULL && q != NULL) {
-        if (p->term.exp < q->term.exp) {
-            insert_term(result, p->term.coeff, p->term.exp); // 插入a的当前项
-            p = p->next; // 移动到a的下一项
-        } else if (p->term.exp > q->term.exp) {
-            insert_term(result, -q->term.coeff, q->term.exp); // 插入b的当前项的相反数
-            q = q->next; // 移动到b的下一项
+Polynomial subtractPolynomials(Polynomial poly1, Polynomial poly2) {
+    Polynomial result = createPolynomial(); // 创建结果多项式
+    
+    Term *term1 = poly1->next; // 指向第一个多项式的第一个项
+    Term *term2 = poly2->next; // 指向第二个多项式的第一个项
+    
+    // 遍历两个多项式
+    while (term1 != NULL && term2 != NULL) {
+        if (term1->exponent < term2->exponent) {
+            insertTerm(result, term1->coefficient, term1->exponent);
+            term1 = term1->next;
+        } else if (term1->exponent > term2->exponent) {
+            insertTerm(result, -term2->coefficient, term2->exponent);
+            term2 = term2->next;
         } else {
-            int diff = p->term.coeff - q->term.coeff; // 合并同类项
+            int diff = term1->coefficient - term2->coefficient;
             if (diff != 0) {
-                insert_term(result, diff, p->term.exp); // 插入合并后的项
+                insertTerm(result, diff, term1->exponent);
             }
-            p = p->next; // 移动到a的下一项
-            q = q->next; // 移动到b的下一项
+            term1 = term1->next;
+            term2 = term2->next;
         }
     }
-
-    // 插入a剩余的项
-    while (p != NULL) {
-        insert_term(result, p->term.coeff, p->term.exp);
-        p = p->next;
+    
+    // 插入剩余项
+    while (term1 != NULL) {
+        insertTerm(result, term1->coefficient, term1->exponent);
+        term1 = term1->next;
     }
-
-    // 插入b剩余的项的相反数
-    while (q != NULL) {
-        insert_term(result, -q->term.coeff, q->term.exp);
-        q = q->next;
+    
+    while (term2 != NULL) {
+        insertTerm(result, -term2->coefficient, term2->exponent);
+        term2 = term2->next;
     }
-
-    return result; // 返回结果多项式
+    
+    return result;
 }
 
 // 多项式乘法
-Polynomial multiply_polynomial(Polynomial a, Polynomial b) {
-    Polynomial result = create_polynomial(); // 创建结果多项式
-    Node *p = a->next; // 指向第一个多项式的第一个节点
-
-    // 遍历第一个多项式的每一项
-    while (p != NULL) {
-        Node *q = b->next; // 指向第二个多项式的第一个节点
-        // 遍历第二个多项式的每一项
-        while (q != NULL) {
-            int coeff = p->term.coeff * q->term.coeff; // 计算系数乘积
-            int exp = p->term.exp + q->term.exp; // 计算指数和
-            insert_term(result, coeff, exp); // 插入乘积项
-            q = q->next; // 移动到b的下一项
+Polynomial multiplyPolynomials(Polynomial poly1, Polynomial poly2) {
+    Polynomial result = createPolynomial(); // 创建结果多项式
+    
+    Term *term1 = poly1->next; // 指向第一个多项式的第一个项
+    while (term1 != NULL) {
+        Term *term2 = poly2->next; // 指向第二个多项式的第一个项
+        while (term2 != NULL) {
+            int coeff = term1->coefficient * term2->coefficient; // 计算系数
+            int exp = term1->exponent + term2->exponent; // 计算指数
+            insertTerm(result, coeff, exp); // 插入新项
+            term2 = term2->next;
         }
-        p = p->next; // 移动到a的下一项
+        term1 = term1->next;
     }
-
-    return result; // 返回结果多项式
-}
-
-void reverse_polynomial(Polynomial poly) {
-    Node *prev = NULL;
-    Node *prev = NULL; // 前一个节点指针初始化为空
-    Node *current = poly->next; // 当前节点指针初始化为头节点的下一个节点
-    poly->next = NULL; // 头节点的下一个节点设为空
-    while (current != NULL) {
-    // 反转链表
-        // 保存当前节点的下一个节点
-        Node *next = current->next;
-        // 将当前节点的下一个节点指向前一个节点，实现反转
-        current->next = prev;
-        // 将前一个节点指向当前节点
-        prev = current;
-        // 将当前节点指向下一个节点
-        current = next;
-    }
-
-    // 将多项式的头节点指向反转后的链表
-    poly->next = prev;
+    
+    return result;
 }
 
 // 打印多项式
-void print_polynomial(Polynomial poly, int reverse_order) {
-    // 如果需要降幂排列，则先复制多项式并反转链表
-    if (reverse_order) {
-        Polynomial copy = create_polynomial();
-        Node *current = poly->next;
-        // 复制多项式的每一项
-        while (current != NULL) {
-            insert_term(copy, current->term.coeff, current->term.exp);
-            current = current->next;
-        }
-        // 反转多项式
-        reverse_polynomial(copy);
-        // 递归打印反转后的多项式
-        print_polynomial(copy, 0);
-        // 销毁复制的多项式
-        destroy_polynomial(copy);
+void printPolynomial(Polynomial poly, int order) {
+    if (poly->next == NULL) {
+        printf("0\n");
         return;
     }
+    
+    // 定义一个指向多项式项的指针current
+    Term *current;
 
-    // 从头节点开始遍历多项式
-    Node *current = poly->next;
-    int is_first = 1; // 标记是否为第一个非零项
-
+    
+    // 根据order的值决定current的初始位置
+    if (order == DESCENDING) { // 如果order为降序
+        current = poly->next; // 从多项式的第一个项开始
+        while (current->next != NULL) { // 遍历到多项式的最后一个项
+            current = current->next;
+        }
+    } else { // 如果order为升序
+        current = poly->next; // 从多项式的第一个项开始
+    }
+    
+    // 定义一个标志变量，用于判断是否是第一个项
+    int firstTerm = 1;
+    
     // 遍历多项式的每一项
     while (current != NULL) {
-        Term term = current->term;
-        // 跳过系数为0的项
-        if (term.coeff == 0) {
-            current = current->next;
-            continue;
-        }
-
-        // 如果不是第一个非零项，根据系数的正负打印符号
-        if (!is_first) {
-            if (term.coeff > 0) {
-                printf(" + ");
+        int coeff = current->coefficient; // 获取当前项的系数
+        int exp = current->exponent; // 获取当前项的指数
+        
+        // 如果不是第一个项，根据系数的正负打印相应的符号
+        if (!firstTerm) {
+            if (coeff > 0) {
+                printf(" + "); // 系数为正，打印加号
             } else {
-                printf(" - ");
+                printf(" - "); // 系数为负，打印减号
+                coeff = -coeff; // 取绝对值
+            }
+        } else { // 如果是第一个项
+            if (coeff < 0) {
+                printf("-"); // 系数为负，打印负号
+                coeff = -coeff; // 取绝对值
+            }
+            firstTerm = 0; // 标记已经处理过第一个项
+        }
+        
+        // 根据指数的值打印相应的格式
+        if (exp == 0) {
+            printf("%d", coeff); // 指数为0，直接打印系数
+        } else if (exp == 1) {
+            if (coeff == 1) {
+                printf("x"); // 系数为1且指数为1，只打印x
+            } else {
+                printf("%dx", coeff); // 打印系数和x
             }
         } else {
-            // 如果是第一个非零项且系数为负，打印负号
-            if (term.coeff < 0) {
-                printf("-");
+            if (coeff == 1) {
+                printf("x^%d", exp); // 系数为1，打印x^指数
+            } else {
+                printf("%dx^%d", coeff, exp); // 打印系数、x和指数
             }
         }
-
-        // 获取系数的绝对值
-        int abs_coeff = abs(term.coeff);
-
-        // 根据指数的值打印多项式的项
-        if (term.exp == 0) {
-            printf("%d", abs_coeff);
-        } else if (term.exp == 1) {
-            if (abs_coeff == 1) {
-                printf("x");
-            } else {
-                printf("%dx", abs_coeff);
-            }
+        
+        // 根据order的值决定current的移动方向
+        if (order == DESCENDING) {
+            current = current->prev; // 降序时，向前移动
         } else {
-            if (abs_coeff == 1) {
-                printf("x^%d", term.exp);
-            } else {
-                printf("%dx^%d", abs_coeff, term.exp);
-            }
+            current = current->next; // 升序时，向后移动
         }
-
-        // 标记已经打印过第一个非零项
-        is_first = 0;
-        // 移动到下一个节点
-        current = current->next;
     }
-
-    // 如果多项式为空，打印0
-    if (is_first) {
-        printf("0");
-    }
-    // 打印换行符
+    // 打印换行符，结束多项式的打印
     printf("\n");
 }
 
-// 主函数
-int main() {
-    int choice;
-    // 循环显示菜单
-    while (1) {
-        printf("\n多项式运算系统\n");
-        printf("1. 加法\n");
-        printf("2. 减法\n");
-        printf("3. 乘法\n");
-        printf("0. 退出\n");
-        printf("请输入选择：");
-        scanf("%d", &choice);
-
-        // 如果选择退出，结束循环
-        if (choice == 0) break;
-
-        // 检查选择的有效性
-        if (choice < 1 || choice > 3) {
-            printf("无效的选择！\n");
-            continue;
-        }
-
-        // 输入两个多项式
-        printf("输入第一个多项式：\n");
-        Polynomial poly1 = input_polynomial();
-        printf("输入第二个多项式：\n");
-        Polynomial poly2 = input_polynomial();
-
-        Polynomial result;
-        // 根据选择进行多项式运算
-        switch (choice) {
-            case 1:
-                result = add_polynomial(poly1, poly2);
-                break;
-            case 2:
-                result = subtract_polynomial(poly1, poly2);
-                break;
-            case 3:
-                result = multiply_polynomial(poly1, poly2);
-                break;
-            default:
-                result = create_polynomial();
-                break;
-        }
-
-        // 打印升幂排列和降幂排列的多项式
-        printf("\n升幂排列：");
-        print_polynomial(result, 0);
-        printf("降幂排列：");
-        print_polynomial(result, 1);
-
-        // 销毁多项式
-        destroy_polynomial(poly1);
-        destroy_polynomial(poly2);
-        destroy_polynomial(result);
+// 释放多项式内存
+void freePolynomial(Polynomial poly) {
+    Term *current = poly->next;
+    while (current != NULL) {
+        Term *temp = current;
+        current = current->next;
+        free(temp);
     }
-
-    return 0;
+    free(poly);
 }
