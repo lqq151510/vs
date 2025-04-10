@@ -2,10 +2,9 @@
 #include<stdlib.h>
 
 typedef int ElemType;
-typedef int Status;
 
-#define OK 1
-#define ERROR 0
+#define LINKLIST_OK 1
+#define LINKLIST_ERROR 0
 
 // 链表节点定义
 typedef struct Node {
@@ -19,38 +18,43 @@ typedef struct LinkList {
 } LinkList;
 
 // 初始化链表
-Status InitList(LinkList *L) {
+int InitList(LinkList *L) {
+    if (L == NULL) return LINKLIST_ERROR;
     L->head = NULL;
     L->length = 0;
-    return OK;
+    return LINKLIST_OK;
 }
 
 // 销毁整个链表（整体删除）
-Status DestroyList(LinkList *L) {
-  Node *current=L->head;
-  Node *next;
-  while(current!=NULL)
-  {
-    next=current->next;
-    free(current);
-    current=next;
-  }
-  L->head=NULL;
-  L->length=0;
-  return OK;
+int DestroyList(LinkList *L) {
+    if (L == NULL) return LINKLIST_ERROR;
+    
+    Node *current = L->head;
+    Node *next;
+    
+    while (current != NULL) {
+        next = current->next;
+        free(current);
+        current = next;
+    }
+    
+    L->head = NULL;
+    L->length = 0;
+    
+    return LINKLIST_OK;
 }
 
 int main() {
-    LinkList list;
+    LinkList list = {0};
     
     // 初始化链表
-    if (InitList(&list) == OK) {
+    if (InitList(&list) == LINKLIST_OK) {
         printf("链表初始化成功\n");
         
         // ...这里可以添加创建链表的代码...
         
         // 销毁链表
-        if (DestroyList(&list) == OK) {
+        if (DestroyList(&list) == LINKLIST_OK) {
             printf("链表已成功销毁\n");
         } else {
             printf("链表销毁失败\n");
@@ -59,5 +63,5 @@ int main() {
         printf("链表初始化失败\n");
     }
     
-    return 0;
+    return EXIT_SUCCESS;  // 使用标准退出码宏定义替代0
 }
