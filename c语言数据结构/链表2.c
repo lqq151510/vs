@@ -8,9 +8,8 @@ typedef struct Node
     struct Node* next;
     
 } Node;
-// Function prototype for bianli
+
 void bianli(Node *L); // Ensure the prototype matches the definition
-void bianli(Node *L);
 
 Node* initlist()
 {
@@ -65,7 +64,6 @@ int insertwei(Node *head, ElemType e)
     
     newNode->data = e;
     newNode->next = NULL;
-
     // 找到链表末尾
     Node *current = head;
     while (current->next != NULL) {
@@ -102,25 +100,6 @@ int getLength(Node *head) {
         current = current->next;
     }
     return length;
-}
-
-int main() {
-    Node *list = initlist();
-    if (list == NULL) {
-        printf("初始化链表失败\n");
-        return EXIT_FAILURE;
-    }
-    
-    if (inserthead(list, 1) != 0 || inserthead(list, 2) != 0) {
-        printf("插入失败\n");
-        freelist(list);
-        return EXIT_FAILURE;
-    }
-    
-    bianli(list);
-    printf("链表长度: %d\n", getLength(list)); // 输出链表长度
-    freelist(list);
-    return EXIT_SUCCESS;
 }
 
 int insertNode(Node *head, int pos, ElemType e) {
@@ -176,5 +155,58 @@ int delNode(Node *head, int pos) {
     free(p);
 
     return 1; // 删除成功
+}
+
+// 查找链表中值为e的节点，返回其位置（从1开始），未找到返回0
+int findNode(Node *head, ElemType e) {
+    if (head == NULL) {
+        return 0; // 空链表返回0
+    }
+    int pos = 1;
+    Node *current = head->next; // 跳过头节点
+    while (current != NULL) {
+        if (current->data == e) {
+            return pos; // 找到返回位置
+        }
+        current = current->next;
+        pos++;
+    }
+    return 0; // 未找到返回0
+}
+
+int main() {
+    Node *list = initlist();
+    if (list == NULL) {
+        printf("初始化链表失败\n");
+        return EXIT_FAILURE;
+    }
+    
+    if (inserthead(list, 1) != 0 || inserthead(list, 2) != 0 || insertwei(list, 3) != 0) {
+        printf("插入失败\n");
+        freelist(list);
+        return EXIT_FAILURE;
+    }
+    
+    bianli(list);
+    printf("链表长度: %d\n", getLength(list)); // 输出链表长度
+
+    // 测试查找功能
+    int pos = findNode(list, 2);
+    if (pos != 0) {
+        printf("值为2的节点位置: %d\n", pos);
+    } else {
+        printf("未找到值为2的节点\n");
+    }
+
+    // 测试删除功能
+    if (delNode(list, 2)) {
+        printf("删除位置2的节点成功\n");
+    } else {
+        printf("删除位置2的节点失败\n");
+    }
+    bianli(list);
+
+    freelist(list);
+    return EXIT_SUCCESS;
 }
 
