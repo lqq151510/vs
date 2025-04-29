@@ -14,7 +14,7 @@ class_names = data.target_names
 
 
 # 2. 划分训练集和测试集
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=52)#42 1.00
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)#42 1.00
 
 # 3. 数据标准化
 scaler = StandardScaler()#这里创建了一个StandardScaler对象，名为scaler。StandardScaler用于标准化特征，使得每个特征具有单位方差和零均值。
