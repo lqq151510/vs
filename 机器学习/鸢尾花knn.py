@@ -1,6 +1,6 @@
-from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split, GridSearchCV
-from  sklearn.preprocessing import StandardScaler
+from sklearn.datasets import load_iris#数据
+from sklearn.model_selection import train_test_split, GridSearchCV#划分数据集
+from  sklearn.preprocessing import StandardScaler#数据标准化
 from sklearn.neighbors import KNeighborsClassifier
 #获取数据集
 iris=load_iris()  
