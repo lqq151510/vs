@@ -5,7 +5,9 @@
         "*.sqlbook": "sql",
         "*.ndjson": "jsonl",
         "*.dbclient-js": "javascript",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "istream": "c",
+        "streambuf": "c"
     }
     
 }
